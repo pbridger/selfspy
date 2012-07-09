@@ -6,7 +6,9 @@ from Cocoa import (NSEvent,
                    NSRightMouseUp, NSRightMouseDown, NSRightMouseUpMask, NSRightMouseDownMask,
                    NSMouseMoved, NSMouseMovedMask,
                    NSScrollWheel, NSScrollWheelMask,
-                   NSAlternateKeyMask, NSCommandKeyMask, NSControlKeyMask)
+                   NSAlternateKeyMask, NSCommandKeyMask, NSControlKeyMask,
+                   NSStatusBar, NSVariableStatusItemLength,
+                   NSMenu, NSMenuItem)
 from Quartz import CGWindowListCopyWindowInfo, kCGWindowListOptionOnScreenOnly, kCGNullWindowID
 from PyObjCTools import AppHelper
 
@@ -32,6 +34,29 @@ class SniffCocoa:
                         | NSMouseMovedMask 
                         | NSScrollWheelMask)
                 NSEvent.addGlobalMonitorForEventsMatchingMask_handler_(mask, sc.handler)
+                self.statusbar = NSStatusBar.systemStatusBar()
+                self.statusItem = self.statusbar.statusItemWithLength_(NSVariableStatusItemLength)
+                self.statusItem.setTitle_(u'Spy')
+                self.statusItem.setHighlightMode_(True)
+
+                self.menu = NSMenu.alloc().init()
+             
+                self.menuItemQuit = NSMenuItem.alloc().init()
+                self.menuItemQuit.setTitle_(u'Quit Selfspy')
+                self.menuItemQuit.setAction_(self.quit)
+                self.menuItemQuit.setKeyEquivalent_(u'')
+                self.menuItemQuit.setEnabled_(True)
+
+                self.menu.addItem_(self.menuItemQuit)
+                self.statusItem.setMenu_(self.menu)
+
+                self.statusItem.setEnabled_(True)
+                self.keysLogged()
+            def quit(self):
+                AppHelper.stopEventLoop()
+            def keysLogged(self):
+                self.menuItemKeysLogged.setTitle_(u'Keys logged: {0}'.format(1))
+
         return AppDelegate
 
     def run(self):
@@ -102,3 +127,4 @@ class SniffCocoa:
 if __name__ == '__main__':
     sc = SniffCocoa()
     sc.run()
+
